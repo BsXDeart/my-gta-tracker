@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 project(PlayerTracker CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+# ปรับเป็น C++20 เพื่อให้รองรับ safetyhook ของ Plugin-SDK
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
-# ดึง Plugin-SDK มาเก็บไว้ใน FetchContent
 include(FetchContent)
+
+# ดึง Plugin-SDK
 FetchContent_Declare(
     plugin-sdk
     GIT_REPOSITORY https://github.com/DK22Pac/plugin-sdk.git
@@ -13,7 +16,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(plugin-sdk)
 
-# กำหนด Target ASI
 add_library(PlayerTracker SHARED src/main.cpp)
 
 set_target_properties(PlayerTracker PROPERTIES 
@@ -21,7 +23,7 @@ set_target_properties(PlayerTracker PROPERTIES
     SUFFIX ".asi"
 )
 
-# เพิ่ม Directory Header สำหรับ Plugin-SDK (SA-MP / GTASA)
+# เพิ่ม Directory Header สำหรับ Plugin-SDK
 target_include_directories(PlayerTracker PRIVATE 
     ${plugin-sdk_SOURCE_DIR}/plugin_sa
     ${plugin-sdk_SOURCE_DIR}/plugin_sa/game_sa
@@ -29,5 +31,10 @@ target_include_directories(PlayerTracker PRIVATE
     ${plugin-sdk_SOURCE_DIR}/shared/game
 )
 
-# Link Dynamic Library ของ Plugin-SDK
+# ป้องกันปัญหา UTF-8 / NOMINMAX ใน MSVC
+target_compile_definitions(PlayerTracker PRIVATE 
+    NOMINMAX 
+    WIN32_LEAN_AND_MEAN
+)
+
 target_link_libraries(PlayerTracker PRIVATE plugin_sa)
