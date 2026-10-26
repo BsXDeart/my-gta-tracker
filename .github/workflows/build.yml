@@ -1,0 +1,32 @@
+name: Build ASI Plugin
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Configure CMake (x86 / 32-bit)
+      run: cmake -B build -A Win32
+
+    - name: Build Release
+      run: cmake --build build --config Release
+
+    - name: Upload ASI Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: PlayerTracker-ASI
+        path: build/Release/*.asi
